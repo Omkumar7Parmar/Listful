@@ -124,10 +124,10 @@ lib/
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourusername/taskmaster.git
+git clone https://github.com/Omkumar7Parmar/Listful.git
 
 # 2. Navigate to the project
-cd taskmaster
+cd Listful
 
 # 3. Install dependencies
 flutter pub get
