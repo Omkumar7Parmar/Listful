@@ -1,9 +1,19 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:task_manager/screens/signup_screen.dart';
-import 'firebase_options.dart';
+import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:task_manager/screens/login_screen.dart';
 import 'package:task_manager/screens/signup_screen.dart';
+import 'package:task_manager/screens/task_list_screen.dart';
+import 'package:task_manager/screens/add_task_screen.dart';
+import 'package:task_manager/screens/edit_task_screen.dart';
+import 'package:task_manager/screens/profile_screen.dart';
+
+import 'package:task_manager/providers/auth_provider.dart' as CustomAuthProvider;
+import 'package:task_manager/providers/task_provider.dart';
+
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,24 +25,45 @@ void main() async {
   runApp(const MyApp());
 }
 
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      routes: {
-        LoginScreen.routeName: (context) => const LoginScreen(),
-        SignupScreen.routeName: (context) => const SignupScreen(),
-        '/task-list': (context) => const SignupScreen(),
-        '/add-task': (context) => const SignupScreen(),
-        '/profile': (context) => const SignupScreen(),
-      },
-      debugShowCheckedModeBanner: false,
-      home: SignupScreen(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CustomAuthProvider.AuthProvider()),
+        ChangeNotifierProvider(create: (_) => TaskProvider()),
+      ],
+      child: MaterialApp(
+        title: 'Task Manager',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+        ),
+        debugShowCheckedModeBanner: false,
+        home: StreamBuilder(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasData) {
+              // User is logged in
+              return const TaskListScreen();
+            }
+            // User is not logged in, go to login screen
+            return const LoginScreen();
+          },
+        ),
+        routes: {
+          LoginScreen.routeName: (context) => const LoginScreen(),
+          SignupScreen.routeName: (context) => const SignupScreen(),
+          TaskListScreen.routeName: (context) => const TaskListScreen(),
+          AddTaskScreen.routeName: (context) => const AddTaskScreen(),
+          ProfileScreen.routeName: (context) => const ProfileScreen(),
+        },
+      ),
     );
   }
 }
-
-

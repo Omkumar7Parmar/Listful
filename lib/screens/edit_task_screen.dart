@@ -1,33 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:task_manager/models/task_model.dart';
 import 'package:task_manager/providers/task_provider.dart';
 
-class AddTaskScreen extends StatefulWidget {
-  static const routeName = '/add-task';
-  const AddTaskScreen({super.key});
+class EditTaskScreen extends StatefulWidget {
+  static const routeName = '/edit-task';
+  final Task task;
+
+  const EditTaskScreen({super.key, required this.task});
 
   @override
-  State<AddTaskScreen> createState() => _AddTaskScreenState();
+  State<EditTaskScreen> createState() => _EditTaskScreenState();
 }
 
-class _AddTaskScreenState extends State<AddTaskScreen> {
+class _EditTaskScreenState extends State<EditTaskScreen> {
   final _formKey = GlobalKey<FormState>();
-  String _title = '';
-  String _description = '';
+  late String _title;
+  late String _description;
 
-  void _tryAddTask() async {
+  @override
+  void initState() {
+    super.initState();
+    _title = widget.task.title;
+    _description = widget.task.description;
+  }
+
+  void _tryUpdateTask() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      FocusScope.of(context).unfocus();
+      FocusScope.of(context).unfocus(); // Dismiss keyboard
 
-      await Provider.of<TaskProvider>(context, listen: false).addTask(
-        _title,
-        _description,
+      final updatedTask = widget.task.copyWith(
+        title: _title,
+        description: _description,
       );
+
+      await Provider.of<TaskProvider>(context, listen: false)
+          .updateTask(updatedTask);
 
       if (!mounted) return;
       if (Provider.of<TaskProvider>(context, listen: false).errorMessage == null) {
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(); // Go back to task list
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(Provider.of<TaskProvider>(context, listen: false).errorMessage!)),
@@ -40,7 +53,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add New Task'),
+        title: const Text('Edit Task'),
         centerTitle: true,
       ),
       body: Padding(
@@ -50,6 +63,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
           child: Column(
             children: <Widget>[
               TextFormField(
+                initialValue: _title,
                 decoration: const InputDecoration(labelText: 'Title'),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
@@ -62,6 +76,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                 },
               ),
               TextFormField(
+                initialValue: _description,
                 decoration: const InputDecoration(labelText: 'Description'),
                 maxLines: 3,
                 validator: (value) {
@@ -79,8 +94,8 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                 builder: (context, taskProvider, child) => taskProvider.isLoading
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
-                        onPressed: _tryAddTask,
-                        child: const Text('Add Task'),
+                        onPressed: _tryUpdateTask,
+                        child: const Text('Update Task'),
                       ),
               ),
             ],
