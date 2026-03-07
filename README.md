@@ -11,8 +11,8 @@
 - [Folder Structure](#-folder-structure)
 - [Tech Stack](#-tech-stack)
 - [Getting Started](#-getting-started)
-- [Screenshots](#-screenshots)
 - [Contributing](#-contributing)
+- [License](#-license)
 
 ---
 
@@ -27,21 +27,20 @@
                     ▼
          ┌──────────────────────┐
          │   Task List (Home)   │
-         │                      │
+         │  • Sort & Filter     │
          │  • Firestore Read    │
-         │  • Delete (Dismiss)  │
-         │  • CheckBox Toggle   │
-         │  • ListView          │
+         │  • Delete Task       │
+         │  • Toggle Complete   │
          └──────┬───────┬───────┘
                 │       │
          ┌──────▼──┐ ┌──▼───────────────┐
          │ Add /   │ │    Profile        │
          │ Edit    │ │                   │
-         │ Task    │ │ • User Info       │
-         │         │ │ • Logout          │
-         │• Title  │ │ • Firebase Auth   │
-         │• Desc   │ │                   │
-         │• Priority│ └──────────────────┘
+         │ Task    │ │ • User Avatar     │
+         │         │ │ • User Info       │
+         │• Title  │ │ • Logout          │
+         │• Desc   │ └──────────────────┘
+         │• Priority│
          │• Date   │
          └─────────┘
 ```
@@ -52,11 +51,13 @@
 
 | Feature | Description |
 |---------|-------------|
-| 🔐 **User Auth** | Secure login & signup using Firebase Authentication |
-| 📝 **Task CRUD** | Create, Read, Update & Delete tasks with Cloud Firestore |
-| 🗂️ **Task Organisation** | Organize by priority, due date & completion status |
-| 🔄 **State Management** | Efficient state handling using Provider |
-| 🧭 **Navigation** | Smooth screen transitions with named routes |
+| 🔐 **User Auth** | Secure login & signup with session persistence using Firebase Authentication. |
+| 📝 **Task CRUD** | Real-time Create, Read, Update & Delete tasks with Cloud Firestore. |
+| 🗂️ **Task Organisation** | Organize tasks by priority (Low, Medium, High) and an optional due date. |
+| 🔍 **Sort & Filter** | Sort tasks by due date or priority, and filter them by completion status. |
+| 👤 **User Profile** | A dedicated screen displaying the user's name, email, and a circular avatar. |
+| 🔄 **State Management** | Efficient and reactive state handling using the Provider package. |
+| 📱 **Responsive UI** | Screens are designed to handle dynamic content and prevent layout overflows. |
 
 ---
 
@@ -65,30 +66,28 @@
 ```
 lib/
 │
-├── main.dart                        # Entry point
+├── main.dart                        # Entry point & routes
 │
 ├── models/
-│   └── task_model.dart              # Task data model
+│   └── task_model.dart              # Data model for tasks
 │
 ├── providers/
-│   ├── auth_provider.dart           # Auth state management
-│   └── task_provider.dart           # Task state management
+│   ├── auth_provider.dart           # Manages authentication state
+│   └── task_provider.dart           # Manages task data, sorting, and filtering
 │
 ├── services/
-│   ├── auth_service.dart            # Firebase Auth logic
-│   └── firestore_service.dart       # Firestore CRUD logic
+│   └── firestore_service.dart       # Handles all Firestore database operations
 │
 ├── screens/
-│   ├── login_screen.dart            # Login UI
-│   ├── signup_screen.dart           # Sign Up UI
-│   ├── task_list_screen.dart        # Home — Task List
-│   ├── add_task_screen.dart         # Add / Edit Task
-│   └── profile_screen.dart          # User Profile + Logout
+│   ├── login_screen.dart            # User login UI
+│   ├── signup_screen.dart           # User registration UI
+│   ├── task_list_screen.dart        # Main dashboard for viewing tasks
+│   ├── add_task_screen.dart         # Form for creating a new task
+│   ├── edit_task_screen.dart        # Form for editing an existing task
+│   └── profile_screen.dart          # User profile display
 │
 ├── widgets/
-│   ├── task_card.dart               # Reusable Task Card
-│   ├── custom_button.dart           # Reusable Button
-│   └── loading_widget.dart          # Loading Indicator
+│   └── task_card.dart               # Reusable card widget to display a single task
 │
 └── utils/
     └── constants.dart               # App-wide constants
@@ -106,6 +105,7 @@ lib/
 │  Auth          │  Firebase Auth       │
 │  Database      │  Cloud Firestore     │
 │  State Mgmt    │  Provider            │
+│  Formatting    │  intl                │
 │  Platform      │  Android / iOS       │
 └────────────────┴──────────────────────┘
 ```
@@ -143,20 +143,10 @@ flutter run
 ### Firebase Setup Checklist
 
 - [ ] Create a Firebase project
-- [ ] Enable **Email/Password** authentication
+- [ ] Enable **Email/Password** authentication in the Firebase console
 - [ ] Create a **Cloud Firestore** database
-- [ ] Download and add config files
-- [ ] Add Firebase dependencies in `pubspec.yaml`
-
----
-
-## 📸 Screenshots
-
-> _Coming soon..._
-
-| Login | Task List | Add Task | Profile |
-|-------|-----------|----------|---------|
-| 📱 | 📱 | 📱 | 📱 |
+- [ ] Download and add the necessary config files to the project
+- [ ] Ensure all dependencies in `pubspec.yaml` are up to date
 
 ---
 
@@ -165,11 +155,11 @@ flutter run
 Contributions, issues, and feature requests are welcome!
 
 ```bash
-# Fork it
-# Create your branch
+# Fork the repository
+# Create your feature branch
 git checkout -b feature/amazing-feature
 
-# Commit changes
+# Commit your changes
 git commit -m "Add amazing feature"
 
 # Push to the branch
@@ -193,3 +183,18 @@ This project is licensed under the **MIT License**.
 ⭐ _Star this repo if you found it helpful!_ ⭐
 
 </div>
+
+
+Final feature list
+Task creation -> Title - Description - Due Date - Priority
+Task Display List -> Title - Due Date - Priority - Checkbox
+-> Edit and Deletion option
+Sort By option -> by Due Date - By priority - By None
+Filter by option -> by Completed Task - by Incompleted Task - by All
+Profile Screen -> that displays Name - Email - User ID (Firebase Auth)
+
+Screenshots of the app
+LoginScreen.png
+SignUpScreen.png
+TaskListScreen.png
+ProfileScreen.png

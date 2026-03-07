@@ -6,6 +6,8 @@ class Task {
   final String description;
   bool isCompleted;
   final String userId;
+  final Timestamp? dueDate;
+  final String priority;
 
   Task({
     required this.id,
@@ -13,6 +15,8 @@ class Task {
     required this.description,
     this.isCompleted = false,
     required this.userId,
+    this.dueDate,
+    this.priority = 'Low',
   });
 
   factory Task.fromFirestore(DocumentSnapshot doc) {
@@ -23,6 +27,8 @@ class Task {
       description: data['description'] ?? '',
       isCompleted: data['isCompleted'] ?? false,
       userId: data['userId'] ?? '',
+      dueDate: data['dueDate'],
+      priority: data['priority'] ?? 'Low',
     );
   }
 
@@ -32,6 +38,8 @@ class Task {
       'description': description,
       'isCompleted': isCompleted,
       'userId': userId,
+      'dueDate': dueDate,
+      'priority': priority,
     };
   }
 
@@ -41,6 +49,8 @@ class Task {
     String? description,
     bool? isCompleted,
     String? userId,
+    Timestamp? dueDate,
+    String? priority,
   }) {
     return Task(
       id: id ?? this.id,
@@ -48,6 +58,8 @@ class Task {
       description: description ?? this.description,
       isCompleted: isCompleted ?? this.isCompleted,
       userId: userId ?? this.userId,
+      dueDate: dueDate ?? this.dueDate,
+      priority: priority ?? this.priority,
     );
   }
 }

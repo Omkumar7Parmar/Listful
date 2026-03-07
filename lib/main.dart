@@ -7,7 +7,6 @@ import 'package:task_manager/screens/login_screen.dart';
 import 'package:task_manager/screens/signup_screen.dart';
 import 'package:task_manager/screens/task_list_screen.dart';
 import 'package:task_manager/screens/add_task_screen.dart';
-import 'package:task_manager/screens/edit_task_screen.dart';
 import 'package:task_manager/screens/profile_screen.dart';
 
 import 'package:task_manager/providers/auth_provider.dart' as CustomAuthProvider;
@@ -33,7 +32,13 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => CustomAuthProvider.AuthProvider()),
-        ChangeNotifierProvider(create: (_) => TaskProvider()),
+        ChangeNotifierProxyProvider<CustomAuthProvider.AuthProvider, TaskProvider>(
+          create: (_) => TaskProvider(),
+          update: (context, auth, previousTaskProvider) {
+            previousTaskProvider!.updateUser(auth.user);
+            return previousTaskProvider;
+          },
+        ),
       ],
       child: MaterialApp(
         title: 'Task Manager',
@@ -46,13 +51,13 @@ class MyApp extends StatelessWidget {
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
             }
             if (snapshot.hasData) {
-              // User is logged in
               return const TaskListScreen();
             }
-            // User is not logged in, go to login screen
             return const LoginScreen();
           },
         ),

@@ -4,7 +4,6 @@ import 'package:task_manager/providers/task_provider.dart';
 import 'package:task_manager/widgets/task_card.dart';
 import 'package:task_manager/screens/add_task_screen.dart';
 import 'package:task_manager/screens/profile_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:task_manager/providers/auth_provider.dart' as CustomAuthProvider;
 
 class TaskListScreen extends StatefulWidget {
@@ -16,18 +15,78 @@ class TaskListScreen extends StatefulWidget {
 }
 
 class _TaskListScreenState extends State<TaskListScreen> {
-  @override
-  void initState() {
-    super.initState();
-    // Ensure the user is logged in before fetching tasks
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (FirebaseAuth.instance.currentUser != null) {
-        Provider.of<TaskProvider>(context, listen: false).fetchTasks();
-      } else {
-        // If for some reason user is null, navigate to login
-        Navigator.of(context).pushReplacementNamed('/login');
-      }
-    });
+  void _showSortOptions(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Sort By'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ListTile(
+                title: const Text('Due Date'),
+                onTap: () {
+                  Provider.of<TaskProvider>(context, listen: false).setSortOption(SortOption.dueDate);
+                  Navigator.of(context).pop();
+                },
+              ),
+              ListTile(
+                title: const Text('Priority'),
+                onTap: () {
+                  Provider.of<TaskProvider>(context, listen: false).setSortOption(SortOption.priority);
+                  Navigator.of(context).pop();
+                },
+              ),
+              ListTile(
+                title: const Text('None'),
+                onTap: () {
+                  Provider.of<TaskProvider>(context, listen: false).setSortOption(SortOption.none);
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showFilterOptions(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Filter By'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ListTile(
+                title: const Text('All'),
+                onTap: () {
+                  Provider.of<TaskProvider>(context, listen: false).setFilterOption(FilterOption.all);
+                  Navigator.of(context).pop();
+                },
+              ),
+              ListTile(
+                title: const Text('Completed'),
+                onTap: () {
+                  Provider.of<TaskProvider>(context, listen: false).setFilterOption(FilterOption.completed);
+                  Navigator.of(context).pop();
+                },
+              ),
+              ListTile(
+                title: const Text('Incomplete'),
+                onTap: () {
+                  Provider.of<TaskProvider>(context, listen: false).setFilterOption(FilterOption.incomplete);
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -38,6 +97,14 @@ class _TaskListScreenState extends State<TaskListScreen> {
         centerTitle: true,
         actions: [
           IconButton(
+            icon: const Icon(Icons.sort),
+            onPressed: () => _showSortOptions(context),
+          ),
+          IconButton(
+            icon: const Icon(Icons.filter_list),
+            onPressed: () => _showFilterOptions(context),
+          ),
+          IconButton(
             icon: const Icon(Icons.person),
             onPressed: () {
               Navigator.of(context).pushNamed(ProfileScreen.routeName);
@@ -47,7 +114,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await Provider.of<CustomAuthProvider.AuthProvider>(context, listen: false).signOut();
-              Navigator.of(context).pushReplacementNamed('/login');
+              // The StreamBuilder in main.dart will automatically navigate to the LoginScreen.
             },
           ),
         ],
@@ -62,7 +129,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
           }
           if (taskProvider.tasks.isEmpty) {
             return const Center(
-              child: Text('No tasks yet! Add a new task to get started.'),
+              child: Text('No tasks found. Add a new task to get started!'),
             );
           }
           return ListView.builder(
