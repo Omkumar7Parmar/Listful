@@ -198,3 +198,4 @@ LoginScreen.png
 SignUpScreen.png
 TaskListScreen.png
 ProfileScreen.png
+AddTaskScreen.png

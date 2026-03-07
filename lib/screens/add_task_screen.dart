@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:task_manager/providers/task_provider.dart';
@@ -60,19 +61,33 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xffF5F7F8),
       appBar: AppBar(
-        title: const Text('Add New Task'),
+        title: const Text('Create a New Task'),
         centerTitle: true,
+        backgroundColor: const Color(0xffF5F7F8),
+        elevation: 0,
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(24.0),
           child: Form(
             key: _formKey,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
+                Text("What are you planning?", style: GoogleFonts.inter(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w400,
+                )),
+                const SizedBox(height: 24),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Title'),
+                  decoration: InputDecoration(
+                    labelText: 'Title',
+                    hintText: 'e.g., Maths Assignment',
+                    prefixIcon: const Icon(Icons.title),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
+                  ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Please enter a title.';
@@ -83,9 +98,15 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                     _title = value!;
                   },
                 ),
+                const SizedBox(height: 16),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Description'),
-                  maxLines: 3,
+                  decoration: InputDecoration(
+                    labelText: 'Description',
+                    hintText: 'Add more details about the task...',
+                    prefixIcon: const Icon(Icons.description),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
+                  ),
+                  maxLines: 4,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Please enter a description.';
@@ -96,25 +117,42 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                     _description = value!;
                   },
                 ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        _dueDate == null
-                            ? 'No due date chosen'
-                            : 'Due Date: ${DateFormat('dd MM yyyy').format(_dueDate!)}',
+                const SizedBox(height: 16),
+                // Due Date Picker styled to match
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12.0),
+                    border: Border.all(color: Colors.grey),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.calendar_today, color: Colors.grey),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          _dueDate == null
+                              ? 'No due date chosen'
+                              : 'Due: ${DateFormat('dd MMM yyyy').format(_dueDate!)}',
+                          style: const TextStyle(fontSize: 16),
+                        ),
                       ),
-                    ),
-                    TextButton(
-                      onPressed: () => _selectDueDate(context),
-                      child: const Text('Choose Date'),
-                    ),
-                  ],
+                      TextButton(
+                        onPressed: () => _selectDueDate(context),
+                        child: const Text('Choose Date'),
+                      ),
+                    ],
+                  ),
                 ),
+                const SizedBox(height: 16),
+                // Priority Dropdown styled to match
                 DropdownButtonFormField<String>(
                   initialValue: _priority,
-                  decoration: const InputDecoration(labelText: 'Priority'),
+                  decoration: InputDecoration(
+                    labelText: 'Priority',
+                    prefixIcon: const Icon(Icons.flag),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
+                  ),
                   items: _priorities.map((String priority) {
                     return DropdownMenuItem<String>(
                       value: priority,
@@ -127,14 +165,27 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                     });
                   },
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 32),
                 Consumer<TaskProvider>(
-                  builder: (context, taskProvider, child) => taskProvider.isLoading
-                      ? const CircularProgressIndicator()
-                      : ElevatedButton(
-                          onPressed: _tryAddTask,
-                          child: const Text('Add Task'),
+                  builder: (context, taskProvider, child) => SizedBox(
+                    height: 56,
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xff2094F3),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
                         ),
+                      ),
+                      onPressed: taskProvider.isLoading ? null : _tryAddTask,
+                      child: taskProvider.isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                              'Add Task',
+                              style: TextStyle(fontSize: 20, color: Colors.white),
+                            ),
+                    ),
+                  ),
                 ),
               ],
             ),
