@@ -1,4 +1,4 @@
-# ✅ TaskMaster — Mini Capstone Project
+# ✅ Listful — Mini Capstone Project
 
 > A clean and minimal **Task Manager App** built with **Flutter** & **Firebase**, featuring full authentication, real-time CRUD operations, and organized state management.
 
