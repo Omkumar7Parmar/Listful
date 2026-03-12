@@ -6,7 +6,7 @@ class Task {
   final String description;
   bool isCompleted;
   final String userId;
-  final Timestamp? dueDate;
+  final DateTime? dueDate;
   final String priority;
 
   Task({
@@ -27,7 +27,7 @@ class Task {
       description: data['description'] ?? '',
       isCompleted: data['isCompleted'] ?? false,
       userId: data['userId'] ?? '',
-      dueDate: data['dueDate'],
+      dueDate: data['dueDate'] != null ? (data['dueDate'] as Timestamp).toDate() : null,
       priority: data['priority'] ?? 'Low',
     );
   }
@@ -38,7 +38,7 @@ class Task {
       'description': description,
       'isCompleted': isCompleted,
       'userId': userId,
-      'dueDate': dueDate,
+      'dueDate': dueDate != null ? Timestamp.fromDate(dueDate!) : null,
       'priority': priority,
     };
   }
@@ -49,7 +49,7 @@ class Task {
     String? description,
     bool? isCompleted,
     String? userId,
-    Timestamp? dueDate,
+    DateTime? dueDate,
     String? priority,
   }) {
     return Task(
@@ -63,3 +63,4 @@ class Task {
     );
   }
 }
+

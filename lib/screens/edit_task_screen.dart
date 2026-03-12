@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -28,7 +27,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
     super.initState();
     _title = widget.task.title;
     _description = widget.task.description;
-    _dueDate = widget.task.dueDate?.toDate();
+    _dueDate = widget.task.dueDate;
     _priority = widget.task.priority;
   }
 
@@ -51,15 +50,14 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
       _formKey.currentState!.save();
       FocusScope.of(context).unfocus(); // Dismiss keyboard
 
-      final updatedTask = widget.task.copyWith(
+      await Provider.of<TaskProvider>(context, listen: false).updateTask(
+        taskId: widget.task.id,
         title: _title,
         description: _description,
-        dueDate: _dueDate != null ? Timestamp.fromDate(_dueDate!) : null,
+        dueDate: _dueDate,
         priority: _priority,
+        isCompleted: widget.task.isCompleted,
       );
-
-      await Provider.of<TaskProvider>(context, listen: false)
-          .updateTask(updatedTask);
 
       if (!mounted) return;
       if (Provider.of<TaskProvider>(context, listen: false).errorMessage == null) {
@@ -71,6 +69,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
       }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

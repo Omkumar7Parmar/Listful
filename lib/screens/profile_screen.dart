@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:task_manager/providers/auth_provider.dart' as CustomAuthProvider;
+import 'package:task_manager/models/user_model.dart';
 
 class ProfileScreen extends StatelessWidget {
   static const routeName = '/profile';
@@ -9,7 +10,8 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<CustomAuthProvider.AuthProvider>(context);
-    final user = authProvider.user;
+    final ListfulUser? user = authProvider.listfulUser;
+
 
     return Scaffold(
       backgroundColor: Colors.grey[200],

@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -41,10 +40,10 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       FocusScope.of(context).unfocus(); // Dismiss keyboard
 
       await Provider.of<TaskProvider>(context, listen: false).addTask(
-        _title,
-        _description,
-        _dueDate != null ? Timestamp.fromDate(_dueDate!) : null,
-        _priority,
+        title: _title,
+        description: _description,
+        dueDate: _dueDate,
+        priority: _priority,
       );
 
       if (!mounted) return;
@@ -57,6 +56,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

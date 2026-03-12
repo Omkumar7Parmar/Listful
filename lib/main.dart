@@ -1,7 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:task_manager/screens/login_screen.dart';
 import 'package:task_manager/screens/signup_screen.dart';
@@ -35,7 +34,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProxyProvider<CustomAuthProvider.AuthProvider, TaskProvider>(
           create: (_) => TaskProvider(),
           update: (context, auth, previousTaskProvider) {
-            previousTaskProvider!.updateUser(auth.user);
+            previousTaskProvider!.updateUser(auth.listfulUser?.uid);
             return previousTaskProvider;
           },
         ),
@@ -47,15 +46,14 @@ class MyApp extends StatelessWidget {
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
         debugShowCheckedModeBanner: false,
-        home: StreamBuilder(
-          stream: FirebaseAuth.instance.authStateChanges(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
+        home: Consumer<CustomAuthProvider.AuthProvider>(
+          builder: (context, auth, _) {
+            if (auth.isLoading && auth.listfulUser == null) {
               return const Scaffold(
                 body: Center(child: CircularProgressIndicator()),
               );
             }
-            if (snapshot.hasData) {
+            if (auth.listfulUser != null) {
               return const TaskListScreen();
             }
             return const LoginScreen();

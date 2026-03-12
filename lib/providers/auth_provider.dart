@@ -1,19 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb;
+import 'package:task_manager/services/auth_service.dart';
+import 'package:task_manager/models/user_model.dart';
 
 class AuthProvider with ChangeNotifier {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  User? _user;
+  final AuthService _authService = AuthService();
+  ListfulUser? _user;
   bool _isLoading = false;
   String? _errorMessage;
 
-  User? get user => _user;
+  ListfulUser? get listfulUser => _user;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
   AuthProvider() {
-    _auth.authStateChanges().listen((User? firebaseUser) {
-      _user = firebaseUser;
+    _authService.authStateChanges.listen((fb.User? firebaseUser) {
+      _user = firebaseUser != null
+          ? ListfulUser(
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              displayName: firebaseUser.displayName,
+            )
+          : null;
       _isLoading = false;
       _errorMessage = null;
       notifyListeners();
@@ -25,8 +33,8 @@ class AuthProvider with ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
     try {
-      await _auth.signInWithEmailAndPassword(email: email, password: password);
-    } on FirebaseAuthException catch (e) {
+      await _authService.signIn(email, password);
+    } on fb.FirebaseAuthException catch (e) {
       _errorMessage = e.message;
     } catch (e) {
       _errorMessage = 'An unknown error occurred: ${e.toString()}';
@@ -41,14 +49,16 @@ class AuthProvider with ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
     try {
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(email: email, password: password);
-      if (userCredential.user != null) {
-        await userCredential.user!.updateDisplayName(displayName);
-        // To get the updated user info, we need to reload the user.
-        await userCredential.user!.reload();
-        _user = _auth.currentUser;
-      }
-    } on FirebaseAuthException catch (e) {
+      await _authService.signUp(email, password, displayName);
+      final firebaseUser = _authService.currentUser;
+      _user = firebaseUser != null
+          ? ListfulUser(
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              displayName: firebaseUser.displayName,
+            )
+          : null;
+    } on fb.FirebaseAuthException catch (e) {
       _errorMessage = e.message;
     } catch (e) {
       _errorMessage = 'An unknown error occurred: ${e.toString()}';
@@ -63,7 +73,7 @@ class AuthProvider with ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
     try {
-      await _auth.signOut();
+      await _authService.signOut();
     } catch (e) {
       _errorMessage = 'Failed to sign out: ${e.toString()}';
     } finally {
@@ -72,3 +82,6 @@ class AuthProvider with ChangeNotifier {
     }
   }
 }
+
+
+

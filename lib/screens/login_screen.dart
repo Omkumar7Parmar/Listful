@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
+// ignore: library_prefixes
 import 'package:task_manager/providers/auth_provider.dart' as CustomAuthProvider;
 import 'package:task_manager/screens/signup_screen.dart';
 import 'package:task_manager/screens/task_list_screen.dart';

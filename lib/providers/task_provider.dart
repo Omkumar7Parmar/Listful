@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:task_manager/models/task_model.dart';
 import 'package:task_manager/services/firestore_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 enum SortOption { none, dueDate, priority }
 enum FilterOption { all, completed, incomplete }
@@ -12,23 +10,24 @@ class TaskProvider with ChangeNotifier {
   final FirestoreService _firestoreService = FirestoreService();
   List<Task> _allTasks = [];
   List<Task> _filteredTasks = [];
-  bool _isLoading = true; // Start in loading state
+  bool _isLoading = true;
   String? _errorMessage;
   StreamSubscription? _tasksStreamSubscription;
   SortOption _sortOption = SortOption.none;
   FilterOption _filterOption = FilterOption.all;
+  String? _currentUserId;
 
   List<Task> get tasks => _filteredTasks;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  // This method will be called by the ProxyProvider whenever the user changes.
-  void updateUser(User? user) {
+  void updateUser(String? userId) {
     _tasksStreamSubscription?.cancel();
-    if (user != null) {
+    _currentUserId = userId;
+    if (userId != null) {
       _isLoading = true;
       notifyListeners();
-      _tasksStreamSubscription = _firestoreService.getTasks(user.uid).listen((tasks) {
+      _tasksStreamSubscription = _firestoreService.getTasks(userId).listen((tasks) {
         _allTasks = tasks;
         _applyFiltersAndSorting();
         _isLoading = false;
@@ -39,7 +38,6 @@ class TaskProvider with ChangeNotifier {
         notifyListeners();
       });
     } else {
-      // Clear data on logout
       _allTasks = [];
       _filteredTasks = [];
       _isLoading = false;
@@ -84,16 +82,20 @@ class TaskProvider with ChangeNotifier {
     _applyFiltersAndSorting();
   }
 
-  Future<void> addTask(String title, String description, Timestamp? dueDate, String priority) async {
+  Future<void> addTask({
+    required String title,
+    required String description,
+    required DateTime? dueDate,
+    required String priority,
+  }) async {
     try {
-      User? user = FirebaseAuth.instance.currentUser;
-      if (user == null) throw Exception('User not logged in.');
+      if (_currentUserId == null) throw Exception('User not logged in.');
       
       final newTask = Task(
         id: '',
         title: title,
         description: description,
-        userId: user.uid,
+        userId: _currentUserId!,
         dueDate: dueDate,
         priority: priority,
       );
@@ -104,9 +106,27 @@ class TaskProvider with ChangeNotifier {
     }
   }
 
-  Future<void> updateTask(Task task) async {
+  Future<void> updateTask({
+    required String taskId,
+    required String title,
+    required String description,
+    required DateTime? dueDate,
+    required String priority,
+    required bool isCompleted,
+  }) async {
     try {
-      await _firestoreService.updateTask(task);
+      if (_currentUserId == null) throw Exception('User not logged in.');
+      
+      final updatedTask = Task(
+        id: taskId,
+        title: title,
+        description: description,
+        userId: _currentUserId!,
+        dueDate: dueDate,
+        priority: priority,
+        isCompleted: isCompleted,
+      );
+      await _firestoreService.updateTask(updatedTask);
     } catch (e) {
       _errorMessage = 'Failed to update task: ${e.toString()}';
       notifyListeners();
@@ -138,3 +158,6 @@ class TaskProvider with ChangeNotifier {
     super.dispose();
   }
 }
+
+
+

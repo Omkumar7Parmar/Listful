@@ -63,7 +63,7 @@ class TaskCard extends StatelessWidget {
                       const Spacer(),
                       if (task.dueDate != null)
                         Text(
-                          'Due: ${DateFormat('dd MM yyyy').format(task.dueDate!.toDate())}',
+                          'Due: ${DateFormat('dd MM yyyy').format(task.dueDate!)}',
                           style: TextStyle(fontSize: 12, color: Colors.grey[700]),
                         ),
                     ],
