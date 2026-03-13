@@ -4,7 +4,7 @@ import 'package:task_manager/services/auth_service.dart';
 import 'package:task_manager/models/user_model.dart';
 
 class AuthProvider with ChangeNotifier {
-  final AuthService _authService = AuthService();
+  final AuthService _authService;
   ListfulUser? _user;
   bool _isLoading = false;
   String? _errorMessage;
@@ -13,7 +13,8 @@ class AuthProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  AuthProvider() {
+  AuthProvider(this._authService) {
+    _isLoading = true;
     _authService.authStateChanges.listen((fb.User? firebaseUser) {
       _user = firebaseUser != null
           ? ListfulUser(
@@ -50,14 +51,6 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
     try {
       await _authService.signUp(email, password, displayName);
-      final firebaseUser = _authService.currentUser;
-      _user = firebaseUser != null
-          ? ListfulUser(
-              uid: firebaseUser.uid,
-              email: firebaseUser.email,
-              displayName: firebaseUser.displayName,
-            )
-          : null;
     } on fb.FirebaseAuthException catch (e) {
       _errorMessage = e.message;
     } catch (e) {

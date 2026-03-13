@@ -7,10 +7,10 @@ enum SortOption { none, dueDate, priority }
 enum FilterOption { all, completed, incomplete }
 
 class TaskProvider with ChangeNotifier {
-  final FirestoreService _firestoreService = FirestoreService();
+  final FirestoreService _firestoreService;
   List<Task> _allTasks = [];
   List<Task> _filteredTasks = [];
-  bool _isLoading = true;
+  bool _isLoading = false;
   String? _errorMessage;
   StreamSubscription? _tasksStreamSubscription;
   SortOption _sortOption = SortOption.none;
@@ -21,9 +21,14 @@ class TaskProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
+  TaskProvider(this._firestoreService);
+
   void updateUser(String? userId) {
+    if (_currentUserId == userId) return;
+    
     _tasksStreamSubscription?.cancel();
     _currentUserId = userId;
+    
     if (userId != null) {
       _isLoading = true;
       notifyListeners();
@@ -32,6 +37,7 @@ class TaskProvider with ChangeNotifier {
         _applyFiltersAndSorting();
         _isLoading = false;
         _errorMessage = null;
+        notifyListeners();
       }, onError: (error) {
         _errorMessage = 'Failed to load tasks: ${error.toString()}';
         _isLoading = false;
@@ -41,7 +47,7 @@ class TaskProvider with ChangeNotifier {
       _allTasks = [];
       _filteredTasks = [];
       _isLoading = false;
-      _errorMessage = 'User not logged in.';
+      _errorMessage = null;
       notifyListeners();
     }
   }
@@ -88,6 +94,9 @@ class TaskProvider with ChangeNotifier {
     required DateTime? dueDate,
     required String priority,
   }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
     try {
       if (_currentUserId == null) throw Exception('User not logged in.');
       
@@ -102,6 +111,8 @@ class TaskProvider with ChangeNotifier {
       await _firestoreService.addTask(newTask);
     } catch (e) {
       _errorMessage = 'Failed to add task: ${e.toString()}';
+    } finally {
+      _isLoading = false;
       notifyListeners();
     }
   }
@@ -114,6 +125,9 @@ class TaskProvider with ChangeNotifier {
     required String priority,
     required bool isCompleted,
   }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
     try {
       if (_currentUserId == null) throw Exception('User not logged in.');
       
@@ -129,25 +143,37 @@ class TaskProvider with ChangeNotifier {
       await _firestoreService.updateTask(updatedTask);
     } catch (e) {
       _errorMessage = 'Failed to update task: ${e.toString()}';
+    } finally {
+      _isLoading = false;
       notifyListeners();
     }
   }
 
   Future<void> deleteTask(String taskId) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
     try {
       await _firestoreService.deleteTask(taskId);
     } catch (e) {
       _errorMessage = 'Failed to delete task: ${e.toString()}';
+    } finally {
+      _isLoading = false;
       notifyListeners();
     }
   }
 
   Future<void> toggleTaskCompletion(Task task) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
     try {
       final updatedTask = task.copyWith(isCompleted: !task.isCompleted);
       await _firestoreService.updateTask(updatedTask);
     } catch (e) {
       _errorMessage = 'Failed to toggle task completion: ${e.toString()}';
+    } finally {
+      _isLoading = false;
       notifyListeners();
     }
   }

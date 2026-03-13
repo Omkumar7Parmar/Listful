@@ -11,6 +11,8 @@ import 'package:task_manager/screens/profile_screen.dart';
 import 'package:task_manager/providers/auth_provider.dart' as CustomAuthProvider;
 import 'package:task_manager/providers/task_provider.dart';
 
+import 'package:task_manager/services/auth_service.dart';
+import 'package:task_manager/services/firestore_service.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -28,11 +30,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authService = AuthService();
+    final firestoreService = FirestoreService();
+
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => CustomAuthProvider.AuthProvider()),
+        ChangeNotifierProvider(create: (_) => CustomAuthProvider.AuthProvider(authService)),
         ChangeNotifierProxyProvider<CustomAuthProvider.AuthProvider, TaskProvider>(
-          create: (_) => TaskProvider(),
+          create: (_) => TaskProvider(firestoreService),
           update: (context, auth, previousTaskProvider) {
             previousTaskProvider!.updateUser(auth.listfulUser?.uid);
             return previousTaskProvider;
